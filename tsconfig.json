@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+
+    // Module settings.
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "resolveJsonModule": true,
+
+    // Strictness and quality settings.
+    "alwaysStrict": true,
+    // "exactOptionalPropertyTypes": true,
+    // "forceConsistentCasingInFileNames": true,
+    // "noFallthroughCasesInSwitch": true,
+    // "noImplicitOverride": true,
+    // "noImplicitReturns": true,
+    // "noPropertyAccessFromIndexSignature": true,
+    // "noUncheckedIndexedAccess": true,
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "strict": true,
+    // "verbatimModuleSyntax": true,
+
+    // Type-checking settings.
+    "lib": ["ES2020"],
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "outDir": "dist",
+  },
+  "include": ["src/**/*", "__tests__/**/*", "bin/**/*"]
+}
