@@ -1,33 +1,33 @@
 {
   "compilerOptions": {
-
-    // Module settings.
+    // Target and module settings
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "module": "node16",
-    "moduleResolution": "node16",
     "resolveJsonModule": true,
 
-    // Strictness and quality settings.
+    // Strictness and quality settings
+    "strict": true,
     "alwaysStrict": true,
-    // "exactOptionalPropertyTypes": true,
-    // "forceConsistentCasingInFileNames": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noImplicitOverride": true,
-    // "noImplicitReturns": true,
-    // "noPropertyAccessFromIndexSignature": true,
-    // "noUncheckedIndexedAccess": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "strict": true,
-    // "verbatimModuleSyntax": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
 
-    // Type-checking settings.
-    "lib": ["ES2020"],
+    // Output settings
+    "outDir": "dist",
+    "rootDir": ".",
+    "declaration": true,
+    "sourceMap": true,
+
+    // Type-checking settings
+    "lib": ["ES2020", "DOM"],
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "rootDir": ".",
-    "outDir": "dist",
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*", "__tests__/**/*", "bin/**/*"]
+  "include": ["src/**/*", "bin/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }

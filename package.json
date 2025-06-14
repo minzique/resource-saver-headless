@@ -1,21 +1,39 @@
 {
-  "name": "ResourceSaverHeadless",
+  "name": "resource-saver-headless",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "description": "A Node.js utility to save webpage resources using experimental chrome dev tool APIs",
+  "main": "dist/src/index.js",
+  "bin": {
+    "resource-saver": "dist/bin/resource-saver.js"
+  },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build:watch": "tsc -w -p tsconfig.json"
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "dev": "ts-node bin/resource-saver.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "puppeteer",
+    "chrome",
+    "devtools",
+    "scraper",
+    "resources"
+  ],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "puppeteer": "^21.5.2"
+  },
   "devDependencies": {
     "@types/node": "^18.15.11",
-    "commander": "^12.1.0",
-    "puppeteer": "^21.5.2",
+    "@types/puppeteer": "^7.0.4",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.2",
     "typescript": "^5.0.4"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

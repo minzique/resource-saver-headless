@@ -10,17 +10,34 @@
 // }
 import * as fs from "fs/promises";
 import { existsSync, mkdirSync } from "fs";
-export function resolveURLToPath(cUrl: string, cType?: string, cContent?: string) {
-    var filepath, filename, isDataURI;
-    var foundIndex = cUrl.search(/\:\/\//);
-    // Check the url whether it is a link or a string of text data
+import * as path from "path";
+
+export interface URLPathInfo {
+  path: string;
+  name: string;
+  dataURI?: string;
+}
+
+/**
+ * Resolves a URL to a local file path structure
+ * @param cUrl - The URL to resolve
+ * @param cType - Optional content type
+ * @param cContent - Optional content for type detection
+ * @returns Path information for saving the resource
+ */
+export function resolveURLToPath(cUrl: string, cType?: string, cContent?: string): URLPathInfo {
+    let filepath: string;
+    let filename: string;
+    let isDataURI: boolean;
+    
+    const foundIndex = cUrl.search(/\:\/\//);
+    
+    // Check if the URL is a data URI or regular URL
     if ((foundIndex === -1) || (foundIndex >= 10)) {
         isDataURI = true;
-        // console.log('Data URI Detected!!!!!');
 
         if (cUrl.indexOf('data:') === 0) {
-            var dataURIInfo = cUrl.split(';')[0].split(',')[0].substring(0, 30).replace(/[^A-Za-z0-9]/g, '.');
-            // console.log('=====> ',dataURIInfo);
+            const dataURIInfo = cUrl.split(';')[0].split(',')[0].substring(0, 30).replace(/[^A-Za-z0-9]/g, '.');
             filename = dataURIInfo + '.' + (Math.random() * 1000000).toFixed(0) + '.txt';
         } else {
             filename = 'data.' + (Math.random() * 1000000).toFixed(0) + '.txt';
@@ -36,121 +53,145 @@ export function resolveURLToPath(cUrl: string, cType?: string, cContent?: string
             // For webpack:// ng:// ftp://
             filepath = cUrl.replace('://', '---').split('?')[0];
         }
+        
         if (filepath.charAt(filepath.length - 1) === '/') {
             filepath = filepath + 'index.html';
         }
         filename = filepath.substring(filepath.lastIndexOf('/') + 1);
     }
 
-    // Get Rid of QueryString after ;
+    // Remove query parameters from filename
     filename = filename.split(';')[0];
     filepath = filepath.substring(0, filepath.lastIndexOf('/') + 1) + filename;
 
-    // Add default extension to non extension filename
+    // Add appropriate file extension based on content type
     if (filename.search(/\./) === -1) {
-        var haveExtension = null;
-        if (cType && cContent) {
-            // Special Case for Images with Base64
-            if (cType.indexOf('image') !== -1) {
-                if (cContent.charAt(0) == '/') {
-                    filepath = filepath + '.jpg';
-                    haveExtension = 'jpg';
-                }
-                if (cContent.charAt(0) == 'R') {
-                    filepath = filepath + '.gif';
-                    haveExtension = 'gif';
-                }
-                if (cContent.charAt(0) == 'i') {
-                    filepath = filepath + '.png';
-                    haveExtension = 'png';
-                }
-            }
-            // Stylesheet | CSS
-            if (cType.indexOf('stylesheet') !== -1 || cType.indexOf('css') !== -1) {
-                filepath = filepath + '.css';
-                haveExtension = 'css';
-            }
-            // JSON
-            if (cType.indexOf('json') !== -1) {
-                filepath = filepath + '.json';
-                haveExtension = 'json';
-            }
-            // Javascript
-            if (cType.indexOf('javascript') !== -1) {
-                filepath = filepath + '.js';
-                haveExtension = 'js';
-            }
-            // HTML
-            if (cType.indexOf('html') !== -1) {
-                filepath = filepath + '.html';
-                haveExtension = 'html';
-            }
-
-            if (!haveExtension) {
-                filepath = filepath + '.html';
-                haveExtension = 'html';
-            }
-        } else {
-            // Add default html for text document
-            filepath = filepath + '.html';
-            haveExtension = 'html';
-        }
-        filename = filename + '.' + haveExtension;
-        // console.log('File without extension: ', filename, filepath);
+        const extension = getFileExtension(cType, cContent);
+        filepath = filepath + '.' + extension;
+        filename = filename + '.' + extension;
     }
 
-    // Remove path violation case
-    filepath = filepath
-        .replace(/\\|\=|\*|\.$|\"|\'|\?|\~|\||\<|\>/g, '')
-        .replace(/\/\//g, '/')
-        .replace(/(\s|\.)\//g, '/')
-        .replace(/\/(\s|\.)/g, '/');
+    // Sanitize file paths
+    filepath = sanitizeFilePath(filepath);
+    filename = sanitizeFileName(filename);
 
-    filename = filename
-        .replace(/\\|\=|\*|\.$|\"|\'|\?|\~|\||\<|\>/g, '')
-
-    // Decode URI
+    // Decode URI components
     if (filepath.indexOf('%') !== -1) {
         try {
             filepath = decodeURIComponent(filepath);
             filename = decodeURIComponent(filename);
         } catch (err) {
-            console.log(err);
+            console.warn('Failed to decode URI components:', err);
         }
     }
 
+    // Clean up path separators
+    filepath = cleanPath(filepath);
+
+    return {
+        path: filepath,
+        name: filename,
+        dataURI: isDataURI ? cUrl : undefined
+    };
+}
+
+/**
+ * Determines file extension based on content type and content
+ */
+function getFileExtension(cType?: string, cContent?: string): string {
+    if (!cType) return 'html';
+
+    // Special case for images with Base64
+    if (cType.indexOf('image') !== -1 && cContent) {
+        if (cContent.charAt(0) === '/') return 'jpg';
+        if (cContent.charAt(0) === 'R') return 'gif';
+        if (cContent.charAt(0) === 'i') return 'png';
+        return 'png'; // default for images
+    }
+    
+    // Map content types to extensions
+    const typeMap: Record<string, string> = {
+        'stylesheet': 'css',
+        'css': 'css',
+        'json': 'json',
+        'javascript': 'js',
+        'html': 'html',
+        'xml': 'xml',
+        'svg': 'svg',
+        'pdf': 'pdf',
+    };
+
+    for (const [type, ext] of Object.entries(typeMap)) {
+        if (cType.indexOf(type) !== -1) {
+            return ext;
+        }
+    }
+
+    return 'html'; // default extension
+}
+
+/**
+ * Sanitizes file path by removing invalid characters
+ */
+function sanitizeFilePath(filepath: string): string {
+    return filepath
+        .replace(/\\|\=|\*|\.$|\"|\'|\?|\~|\||\<|\>/g, '')
+        .replace(/\/\//g, '/')
+        .replace(/(\s|\.)\//g, '/')
+        .replace(/\/(\s|\.)/g, '/');
+}
+
+/**
+ * Sanitizes filename by removing invalid characters
+ */
+function sanitizeFileName(filename: string): string {
+    return filename.replace(/\\|\=|\*|\.$|\"|\'|\?|\~|\||\<|\>/g, '');
+}
+
+/**
+ * Cleans and normalizes file paths
+ */
+function cleanPath(filepath: string): string {
     // Strip double slashes
     while (filepath.includes('//')) {
         filepath = filepath.replace('//', '/');
     }
 
-    // Strip the first slash '/src/...' -> 'src/...'
+    // Strip leading slash
     if (filepath.charAt(0) === '/') {
         filepath = filepath.slice(1);
     }
 
-    //  console.log('Save to: ', filepath);
-    //  console.log('File name: ',filename);
-
-    return {
-        path: filepath,
-        name: filename,
-        dataURI: isDataURI && cUrl
-    }
-
+    return filepath;
 }
 
-export async function saveFile(outFolder: string, path: string, data: string) {
+/**
+ * Saves file content to the specified path
+ * @param outFolder - Output directory
+ * @param filePath - Relative file path
+ * @param data - File content
+ */
+export async function saveFile(outFolder: string, filePath: string, data: string): Promise<void> {
     try {
-        existsSync(outFolder) || mkdirSync(outFolder, { recursive: true });
+        // Ensure output folder exists
+        if (!existsSync(outFolder)) {
+            mkdirSync(outFolder, { recursive: true });
+        }
 
-        await fs.mkdir(outFolder + '/' + path.substring(0, path.lastIndexOf('/')), { recursive: true });
-        await fs.writeFile(outFolder + '/' + path, data)
+        const fullPath = path.join(outFolder, filePath);
+        const directory = path.dirname(fullPath);
+
+        // Create directory structure
+        await fs.mkdir(directory, { recursive: true });
+        
+        // Write file
+        await fs.writeFile(fullPath, data, 'utf-8');
+        
+        console.log(`Saved: ${filePath}`);
     } catch (err) {
-        console.error('Error writing file', err);
-        // throw err;
+        console.error(`Error writing file ${filePath}:`, err);
+        throw err;
     }
-
 }
 
 // function recursiveMkdir(path) {
