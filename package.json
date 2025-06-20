@@ -1,6 +1,6 @@
 {
   "name": "resource-saver-headless",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "A robust Node.js utility to save webpage resources using Chrome DevTools Protocol via Puppeteer. Extract and download all static assets from any webpage for offline use or analysis.",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
