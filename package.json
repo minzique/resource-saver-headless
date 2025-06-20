@@ -1,16 +1,23 @@
 {
   "name": "resource-saver-headless",
-  "version": "1.0.0",
-  "description": "A Node.js utility to save webpage resources using experimental chrome dev tool APIs",
+  "version": "0.9.0",
+  "description": "A robust Node.js utility to save webpage resources using Chrome DevTools Protocol via Puppeteer. Extract and download all static assets from any webpage for offline use or analysis.",
   "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "bin": {
     "resource-saver": "dist/bin/resource-saver.js"
   },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "start": "ts-node src/index.ts",
     "build": "tsc",
     "build:watch": "tsc -w",
     "dev": "ts-node bin/resource-saver.ts",
+    "prepublishOnly": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -18,10 +25,28 @@
     "chrome",
     "devtools",
     "scraper",
-    "resources"
+    "resources",
+    "web-scraping",
+    "offline",
+    "static-assets",
+    "html",
+    "css",
+    "javascript",
+    "images",
+    "webpage-saver",
+    "cli-tool",
+    "typescript"
   ],
-  "author": "",
+  "author": "minzique <hello@minzique.net>",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minzique/resource-saver-headless.git"
+  },
+  "homepage": "https://github.com/minzique/resource-saver-headless#readme",
+  "bugs": {
+    "url": "https://github.com/minzique/resource-saver-headless/issues"
+  },
   "dependencies": {
     "commander": "^12.1.0",
     "puppeteer": "^21.5.2"

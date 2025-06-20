@@ -1,0 +1,53 @@
+# Source files
+src/
+bin/
+*.ts
+!*.d.ts
+
+# Development files
+tsconfig.json
+pnpm-lock.yaml
+.gitignore
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (keep README.md)
+docs/
+
+# Test and build artifacts
+coverage/
+*.lcov
+.nyc_output
+logs/
+*.log
+
+# Temporary folders
+tmp/
+temp/
+downloads/
+output/
+out/
+
+# Environment files
+.env*
+
+# Development dependencies
+node_modules/ 
